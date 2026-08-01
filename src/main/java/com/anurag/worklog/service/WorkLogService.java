@@ -4,6 +4,8 @@ import com.anurag.worklog.dto.WorkLogRequest;
 import com.anurag.worklog.dto.WorkLogResponse;
 import com.anurag.worklog.entity.User;
 import com.anurag.worklog.entity.WorkLog;
+import com.anurag.worklog.exception.ResourceNotFoundException;
+import com.anurag.worklog.exception.UnauthorizedActionException;
 import com.anurag.worklog.repository.UserRepository;
 import com.anurag.worklog.repository.WorkLogRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,7 @@ public class WorkLogService {
     private final UserRepository userRepository;
 
     public WorkLogResponse create(WorkLogRequest request, Long userId){
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Invalid user"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         WorkLog workLog = new WorkLog();
         workLog.setTitle(request.getTitle());
@@ -51,10 +53,10 @@ public class WorkLogService {
 
     public WorkLogResponse update(Long logId, WorkLogRequest request, Long userId){
         WorkLog workLog = workLogRepository.findById(logId)
-                .orElseThrow(() -> new RuntimeException("work log not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Work log not found"));
 
         if(!workLog.getUser().getId().equals(userId)){
-            throw new RuntimeException("Not authorized to modify this log");
+            throw new UnauthorizedActionException("Not authorized to perform this action");
         }
 
         workLog.setTitle(request.getTitle());
@@ -70,10 +72,10 @@ public class WorkLogService {
 
     public void delete(Long logId, Long userId){
         WorkLog workLog = workLogRepository.findById(logId)
-                .orElseThrow(() -> new RuntimeException("work log not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Work log not found"));
 
         if(!workLog.getUser().getId().equals(userId)){
-            throw new RuntimeException("Not authorized to modify this log");
+            throw new UnauthorizedActionException("Not authorized to perform this action");
         }
 
         workLogRepository.delete(workLog);
