@@ -4,6 +4,8 @@ import com.anurag.worklog.dto.LoginRequest;
 import com.anurag.worklog.dto.RegisterRequest;
 import com.anurag.worklog.dto.UserResponse;
 import com.anurag.worklog.entity.User;
+import com.anurag.worklog.exception.DuplicateResourceException;
+import com.anurag.worklog.exception.InvalidCredentialsException;
 import com.anurag.worklog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,11 +20,11 @@ public class AuthService {
 
     public UserResponse register(RegisterRequest request){
         if(userRepository.existsByUsername(request.getUsername())){
-            throw new RuntimeException("Username already taken");
+            throw new DuplicateResourceException("Username already exists");
         }
 
         if(userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Email already registered");
+            throw new DuplicateResourceException("Email already exists");
         }
 
         User user = new User();
@@ -36,10 +38,10 @@ public class AuthService {
 
     public UserResponse login(LoginRequest request){
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid Username or password"));
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
-            throw new RuntimeException("Invalid username or password");
+            throw new InvalidCredentialsException("Invalid username or password");
         }
 
         return toUserResponse(user);
