@@ -12,15 +12,24 @@ import java.util.Map;
 
 
 /*
+It's a single, centralized place that intercepts exceptions
+thrown anywhere in your controllers/services, and converts them into clean,
+consistent JSON error responses —
+instead of Spring's default behavior of returning a giant stack trace to the client.
+ */
+
+
+/*
 Every method follows the same recipe:
 build a small Map with timestamp,
 status (the numeric HTTP code), error (a short label),
  and message (pulled straight from ex.getMessage() —
  the string you passed in when you threw the exception,
  e.g. "Username already exists").
- Then wrap that map in a ResponseEntity with the matching HTTP status code,
- and return it.
- Spring automatically serializes that Map into JSON for the response body.
+ Then wrap that map in a ResponseEntity
+ with the matching HTTP status code, and return it.
+ Spring automatically serializes that
+ Map into JSON for the response body.
  */
 
 
